@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1b31">
+  <meta name="description" content="MOSCHATO WEATHER — πρόγνωση καιρού για Μοσχάτο και Ταύρο με βάση το NOAA GFS.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>MOSCHATO WEATHER</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="MOSCHATO WEATHER αρχική">
+        <span class="brand-mark">MW</span>
+        <span><strong>MOSCHATO</strong><small>WEATHER</small></span>
+      </a>
+      <div class="top-actions">
+        <span class="source-pill"><i></i> NOAA GFS</span>
+        <button id="refreshBtn" class="icon-btn" aria-label="Ανανέωση δεδομένων" title="Ανανέωση">↻</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero panel">
+        <div class="hero-heading">
+          <div>
+            <p class="eyebrow">ΜΟΣΧΑΤΟ · ΤΑΥΡΟΣ</p>
+            <h1>Ο καιρός στην πόλη μας.</h1>
+            <p id="updatedAt" class="muted">Γίνεται λήψη πρόγνωσης…</p>
+          </div>
+          <div class="model-stamp"><span class="pulse"></span><span>ΠΡΟΓΝΩΣΗ<br><b>GFS</b></span></div>
+        </div>
+        <div id="currentWeather" class="current-grid">
+          <div class="current-main">
+            <div id="currentIcon" class="weather-icon">⛅</div>
+            <div><div id="currentTemp" class="temperature">--°</div><div id="currentDesc" class="current-desc">Φόρτωση…</div></div>
+          </div>
+          <div class="current-stats">
+            <div class="stat"><span>Αίσθηση</span><b id="feelsLike">--°</b></div>
+            <div class="stat"><span>Υγρασία</span><b id="humidity">--%</b></div>
+            <div class="stat"><span>Άνεμος</span><b id="wind">-- km/h</b></div>
+            <div class="stat"><span>Πίεση</span><b id="pressure">-- hPa</b></div>
+          </div>
+        </div>
+        <div class="hero-foot"><span>📍 Κέντρο Μοσχάτου</span><span id="daylight">Τοπική ώρα Ελλάδας</span></div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-title"><div><p class="eyebrow">ΕΠΟΜΕΝΕΣ ΩΡΕΣ</p><h2>Ωριαία πρόγνωση</h2></div><span class="subtle">48 ώρες</span></div>
+        <div id="hourly" class="hourly-list"><div class="loading-card">Φόρτωση ωριαίας πρόγνωσης…</div></div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-title forecast-title">
+          <div><p class="eyebrow">GFS FORECAST</p><h2>Πρόγνωση ημερών</h2></div>
+          <div class="segmented"><button class="active" data-days="7">7 ημέρες</button><button data-days="16">16 ημέρες</button></div>
+        </div>
+        <div id="daily" class="daily-list"><div class="loading-card">Φόρτωση ημερήσιας πρόγνωσης…</div></div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-title"><div><p class="eyebrow">ΠΑΡΑΚΟΛΟΥΘΗΣΗ</p><h2>Καιρικοί δείκτες</h2></div></div>
+        <div class="metrics-grid">
+          <article class="metric-card"><span class="metric-icon">🌧️</span><span class="metric-label">Βροχή τώρα</span><b id="rainNow">-- mm</b></article>
+          <article class="metric-card"><span class="metric-icon">💨</span><span class="metric-label">Ριπές ανέμου</span><b id="gusts">-- km/h</b></article>
+          <article class="metric-card"><span class="metric-icon">☁️</span><span class="metric-label">Νέφωση</span><b id="clouds">--%</b></article>
+          <article class="metric-card"><span class="metric-icon">🌡️</span><span class="metric-label">Μέγιστη σήμερα</span><b id="todayMax">--°</b></article>
+        </div>
+      </section>
+
+      <section class="notice">
+        <div class="notice-icon">ⓘ</div>
+        <div><strong>Πώς διαβάζεις την πρόγνωση</strong><p>Οι τιμές προέρχονται από το αριθμητικό μοντέλο NOAA GFS και αποτελούν προγνωστική εκτίμηση, όχι επιτόπιες μετρήσεις. Η αξιοπιστία μειώνεται όσο μεγαλώνει ο χρονικός ορίζοντας.</p></div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-brand">MOSCHATO <b>WEATHER</b></div>
+      <p>Πρόγνωση καιρού για Μοσχάτο – Ταύρο</p>
+      <p>Πηγή πρόγνωσης: NOAA GFS μέσω Open-Meteo</p>
+      <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo · Πηγή δεδομένων</a>
+      <p class="footer-small">Οι μετρήσεις του τοπικού μετεωρολογικού σταθμού και οι επίσημες προειδοποιήσεις θα προστεθούν σε επόμενη έκδοση.</p>
+    </footer>
+  </div>
+  <div id="errorToast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
