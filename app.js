@@ -61,7 +61,7 @@ function renderHourly(){
   let start=h.time.findIndex(t=>new Date(t)>=new Date(now.getTime()-60*60*1000));if(start<0)start=0;
   $("hourly").innerHTML=h.time.slice(start,start+48).map((t,j)=>{
     const i=start+j,[icon]=weatherInfo(h.weather_code[i]);
-    return `<article class="hour-card ${j===0?"now":""}"><div class="hour-time">${j===0?"Τώρα":dateFmt(t,{weekday:"short",hour:"2-digit"})}</div><div class="hour-icon">${icon}</div><div class="hour-temp">${fmt(h.temperature_2m[i],"°")}</div><div class="hour-rain">💧 ${fmt(h.precipitation_probability[i],"%")}</div></article>`;
+    return `<article class="hour-card ${j===0?"now":""}"><div class="hour-time">${j===0?"Επόμενη":dateFmt(t,{weekday:"short",hour:"2-digit"})}</div><div class="hour-icon">${icon}</div><div class="hour-temp">${fmt(h.temperature_2m[i],"°")}</div><div class="hour-rain">💧 ${fmt(h.precipitation_probability[i],"%")}</div></article>`;
   }).join("");
 }
 function renderDaily(){
@@ -71,7 +71,22 @@ function renderDaily(){
     return `<article class="day-row"><div><div class="day-name">${dayName(t,i)}</div><div class="day-date">${dateFmt(t,{day:"numeric",month:"short"})}</div></div><div class="day-icon">${icon}</div><div class="day-desc">${desc}</div><div class="day-temps">${fmt(d.temperature_2m_max[i],"°")} <span>${fmt(d.temperature_2m_min[i],"°")}</span></div><div class="day-rain">💧 ${fmt(d.precipitation_probability_max[i],"%")}</div></article>`;
   }).join("");
 }
-function render(){renderCurrent();renderHourly();renderDaily()}
+async function loadStation(){
+  try{
+    const res=await fetch('/api/current',{cache:'no-store'});
+    if(!res.ok)throw new Error(`Davis API ${res.status}`);
+    const d=await res.json();
+    const put=(id,value,suffix='',digits=0)=>{if(value!==null&&value!==undefined&&Number.isFinite(Number(value)))$(id).textContent=fmt(value,suffix,digits)};
+    put('currentTemp',d.temperature,'°',1);put('feelsLike',d.feelsLike,'°',1);put('humidity',d.humidity,'%');
+    put('wind',d.wind,' km/h',1);put('pressure',d.pressure,' hPa',1);put('gusts',d.gusts,' km/h',1);
+    put('rainNow',d.rainRate,' mm/h',1);
+    if(d.temperature!==null)$('currentDesc').textContent='Πραγματική μέτρηση Davis Vantage Vue';
+    $('updatedAt').textContent=d.observedAt?`Davis · τελευταία μέτρηση: ${dateFmt(d.observedAt,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}`:'Davis · αναμονή μέτρησης';
+    const pill=document.querySelector('.source-pill');if(pill)pill.innerHTML='<i></i> DAVIS LIVE · GFS';
+    const stamp=document.querySelector('.model-stamp');if(stamp)stamp.innerHTML='<span class="pulse"></span><span>ΖΩΝΤΑΝΕΣ<br><b>ΜΕΤΡΗΣΕΙΣ</b></span>';
+  }catch(e){console.warn('Davis station unavailable:',e);$('updatedAt').textContent='Οι πραγματικές μετρήσεις Davis δεν είναι ακόμη συνδεδεμένες · οι τιμές παραμένουν εκτίμηση GFS.'}
+}
+function render(){renderCurrent();renderHourly();renderDaily();loadStation()}
 $("refreshBtn").addEventListener("click",loadForecast);
 document.querySelectorAll("[data-days]").forEach(b=>b.addEventListener("click",()=>{
   visibleDays=Number(b.dataset.days);document.querySelectorAll("[data-days]").forEach(x=>x.classList.toggle("active",x===b));if(forecast)renderDaily();
